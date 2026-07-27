@@ -19,6 +19,21 @@ const handleCreateUser = async (req, res, next) => {
     }
 };
 
+const handleGetUsers = async (req, res, next) => {
+    try {
+        const result = await userService.getUsers(req.query);
+
+        res.status(200).json({
+            success: true,
+            data: result.users,
+            pagination: result.pagination,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     handleCreateUser,
+    handleGetUsers
 };

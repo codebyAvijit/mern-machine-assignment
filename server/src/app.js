@@ -1,26 +1,33 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const path = require("path");
 
 const stateRoutes = require("./routes/state.routes");
 const userRoutes = require("./routes/user.routes");
 
+const {
+    errorHandler,
+    notFoundHandler,
+} = require("./middleware/error.middleware");
+
 const app = express();
 
-// Security middleware
 app.use(helmet());
 
-// CORS
 app.use(
     cors({
         origin: process.env.CLIENT_URL,
     })
 );
 
-// Body parser
 app.use(express.json());
 
-// Health check
+app.use(
+    "/uploads",
+    express.static(path.join(__dirname, "../uploads"))
+);
+
 app.get("/api/health", (req, res) => {
     res.status(200).json({
         success: true,
@@ -28,8 +35,13 @@ app.get("/api/health", (req, res) => {
     });
 });
 
-// API routes
 app.use("/api/states", stateRoutes);
 app.use("/api/users", userRoutes);
+
+// Must remain after valid routes
+app.use(notFoundHandler);
+
+// Error middleware must be last
+app.use(errorHandler);
 
 module.exports = app;
