@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import useDebounce from "../../hooks/useDebounce";
 import { getUsers } from "../../api/user.api";
 import { getStates } from "../../api/state.api";
 
@@ -21,6 +21,8 @@ const UserListing = () => {
 
     const [filters, setFilters] =
         useState(INITIAL_FILTERS);
+
+    const debouncedName = useDebounce(filters.name, 400);
 
     const [pagination, setPagination] = useState({
         page: 1,
@@ -57,7 +59,7 @@ const UserListing = () => {
                 setError("");
 
                 const response = await getUsers({
-                    name: filters.name || undefined,
+                    name: debouncedName || undefined,
                     gender: filters.gender || undefined,
                     stateId: filters.stateId || undefined,
                     page: pagination.page,
@@ -84,7 +86,7 @@ const UserListing = () => {
 
         loadUsers();
     }, [
-        filters.name,
+        debouncedName,
         filters.gender,
         filters.stateId,
         pagination.page,
