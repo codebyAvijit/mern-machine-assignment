@@ -8,37 +8,20 @@ const registerUserSchema = z
             .min(1, "Name is required")
             .max(25, "Name cannot exceed 25 characters"),
 
-        gender: z.enum(["Male", "Female"], {
-            message: "Gender must be Male or Female",
-        }),
+        gender: z.enum(["Male", "Female"]),
 
         dateOfBirth: z
             .string()
             .trim()
-            .regex(
-                /^\d{2}\/\d{2}\/\d{4}$/,
-                "Date of birth must be in dd/mm/yyyy format"
-            )
-            .refine((value) => {
-                const [day, month, year] = value.split("/").map(Number);
-                const date = new Date(year, month - 1, day);
-
-                return (
-                    date.getFullYear() === year &&
-                    date.getMonth() === month - 1 &&
-                    date.getDate() === day
-                );
-            }, "Invalid date of birth")
-            .transform((value) => {
-                const [day, month, year] = value.split("/").map(Number);
-                return new Date(year, month - 1, day);
-            }),
+            .min(1, "Date of birth is required"),
 
         email: z
             .string()
             .trim()
             .refine(
-                (value) => !value || z.email().safeParse(value).success,
+                (value) =>
+                    !value ||
+                    z.email().safeParse(value).success,
                 "Invalid email address"
             )
             .optional(),
@@ -52,22 +35,36 @@ const registerUserSchema = z
             .trim()
             .min(1, "State is required"),
 
-        city: z
-            .string()
-            .trim()
-            .min(1, "City is required"),
+        city: z.string().trim().optional(),
 
-        hobbies: z
-            .array(
-                z.enum(["Chess", "Cricket", "Football", "Hockey"])
+        hobbies: z.preprocess(
+            (value) => {
+                if (!value) {
+                    return [];
+                }
+
+                if (Array.isArray(value)) {
+                    return value;
+                }
+
+                return [value];
+            },
+            z.array(
+                z.enum([
+                    "Chess",
+                    "Cricket",
+                    "Football",
+                    "Hockey",
+                ])
             )
-            .optional()
-            .default([]),
+        ),
     })
-    .refine(
-        (data) => Boolean(data.mobile || data.phone),
+    .refine(    
+        (data) =>
+            Boolean(data.mobile || data.phone),
         {
-            message: "Either mobile or phone is required",
+            message:
+                "Either mobile or phone is required",
             path: ["mobile"],
         }
     );
