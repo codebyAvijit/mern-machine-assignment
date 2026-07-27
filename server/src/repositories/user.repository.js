@@ -10,7 +10,9 @@ const createUser = async (userData) => {
 
 const getUsers = async ({ filter, skip, limit }) => {
     const users = await User.find(filter)
-        .select("name gender stateId email picture")
+        .select(
+            "name gender stateId city email hobbies picture"
+        )
         .populate("stateId", "name")
         .skip(skip)
         .limit(limit)
