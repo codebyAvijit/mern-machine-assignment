@@ -54,4 +54,10 @@ const {
   errorHandler,
 } = require("./middleware/error.middleware");
 
+// Handle unknown routes
+app.use(notFoundHandler);
+
+// Handle application errors
+app.use(errorHandler);
+
 module.exports = app;

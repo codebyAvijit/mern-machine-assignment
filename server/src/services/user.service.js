@@ -1,33 +1,28 @@
 const bcrypt = require("bcryptjs");
-
 const userRepository = require("../repositories/user.repository");
 const stateRepository = require("../repositories/state.repository");
+const AppError = require("../utils/errors/AppError");
 
 const createUser = async (userData) => {
   if (userData.email) {
     const existingUser = await userRepository.findByEmail(userData.email);
 
     if (existingUser) {
-      const error = new Error("User with this email already exists");
-      error.statusCode = 409;
-      throw error;
+      throw new AppError("User with this email already exists", 409);
     }
   }
 
   const state = await stateRepository.getStateById(userData.stateId);
 
   if (!state) {
-    const error = new Error("Invalid state");
-    error.statusCode = 400;
-    throw error;
+    throw new AppError("Invalid state", 400);
   }
 
   if (userData.city && !state.cities.includes(userData.city)) {
-    const error = new Error(
+    throw new AppError(
       "Selected city does not belong to the selected state",
+      400,
     );
-    error.statusCode = 400;
-    throw error;
   }
 
   userData.password = await bcrypt.hash(userData.password, 10);
