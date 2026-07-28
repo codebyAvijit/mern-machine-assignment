@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useDebounce from "../../hooks/useDebounce";
 import { getUsers } from "../../api/user.api";
 import { getStates } from "../../api/state.api";
-
+import { Plus, LogOut } from "lucide-react";
+import { toast } from "sonner";
 import UserTable from "./UserTable";
 import UserFilters from "./UserFilters";
 
@@ -62,7 +63,7 @@ const UserListing = () => {
           limit: pagination.limit,
         });
 
-        setUsers(response.data || []);
+        setUsers(response.users || []);
 
         setPagination((previous) => ({
           ...previous,
@@ -124,30 +125,49 @@ const UserListing = () => {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
+
+    toast.success("Logged out successfully.");
+
+    navigate("/login");
+  };
+
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl rounded-md bg-white shadow-md">
         {/* Header */}
+
         <div className="flex flex-col gap-4 border-b border-gray-200 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-gray-800">
-              User Listing
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-800">User Listing</h1>
 
             <p className="mt-1 text-sm text-gray-500">
               {pagination.total} users found
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/register")}
-            className="rounded bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Add User
-          </button>
-        </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+              <Plus size={18} />
+              Add User
+            </button>
 
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-red-700"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </div>
         {/* Filters */}
         <div className="border-b border-gray-200 p-5">
           <UserFilters

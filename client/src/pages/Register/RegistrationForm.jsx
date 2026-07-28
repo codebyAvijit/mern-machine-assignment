@@ -1,9 +1,11 @@
 import { HOBBIES } from "./register.constants";
-
+import { Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useState } from "react";
 
 const RegistrationForm = ({
   form,
@@ -27,6 +29,18 @@ const RegistrationForm = ({
   const labelClass = "mb-1 block text-sm font-medium text-gray-700";
 
   const errorClass = "mt-1 text-xs text-red-500";
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleToggleConfirmPassword = () => {
+    setShowConfirmPassword((prev) => !prev);
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   // Allow only digits and maximum 10 characters.
   const handlePhoneChange = (event) => {
@@ -161,43 +175,67 @@ const RegistrationForm = ({
               </div>
 
               {/* Password */}
+
               <div>
                 <label className={labelClass}>
                   Password <span className="text-red-500">*</span>
                 </label>
 
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={onChange}
-                  className={inputClass}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={form.password}
+                    onChange={onChange}
+                    className={`${inputClass} pr-10`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleTogglePassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
 
                 {errors.password && (
                   <p className={errorClass}>{errors.password}</p>
                 )}
               </div>
-
+              {/* Confirm Password */}
               {/* Confirm Password */}
               <div>
                 <label className={labelClass}>
                   Confirm Password <span className="text-red-500">*</span>
                 </label>
 
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={form.confirmPassword}
-                  onChange={onChange}
-                  className={inputClass}
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={form.confirmPassword}
+                    onChange={onChange}
+                    className={`${inputClass} pr-10`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleToggleConfirmPassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
 
                 {errors.confirmPassword && (
                   <p className={errorClass}>{errors.confirmPassword}</p>
                 )}
               </div>
-
               {/* Mobile */}
               <div>
                 <label className={labelClass}>Mobile</label>
@@ -371,6 +409,15 @@ const RegistrationForm = ({
               >
                 {loading ? "Submitting..." : "Submit"}
               </button>
+              <p className="mt-4 text-center text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-blue-600 hover:underline"
+                >
+                  Login
+                </Link>
+              </p>
             </div>
           </form>
         </div>

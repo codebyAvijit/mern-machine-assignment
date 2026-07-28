@@ -1,370 +1,323 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "sonner";
 import RegistrationForm from "./RegistrationForm";
 import { INITIAL_FORM, DRAFT_KEY } from "./register.constants";
 import { validateRegistration } from "./registerValidation";
-
 import { getStates, getCitiesByState } from "../../api/state.api";
 import { registerUser } from "../../api/user.api";
 
 import {
-    getStorageItem,
-    setStorageItem,
-    removeStorageItem,
+  getStorageItem,
+  setStorageItem,
+  removeStorageItem,
 } from "../../utils/storage";
 
 const Register = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    // Form state
-    const [form, setForm] = useState(() =>
-        getStorageItem(DRAFT_KEY, INITIAL_FORM)
-    );
+  // Form state
+  const [form, setForm] = useState(() =>
+    getStorageItem(DRAFT_KEY, INITIAL_FORM),
+  );
 
-    // API data
-    const [states, setStates] = useState([]);
-    const [cities, setCities] = useState([]);
+  // API data
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
 
-    // File cannot be persisted in localStorage
-    const [picture, setPicture] = useState(null);
+  // File cannot be persisted in localStorage
+  const [picture, setPicture] = useState(null);
 
-    // UI state
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [statesLoading, setStatesLoading] = useState(false);
-    const [citiesLoading, setCitiesLoading] = useState(false);
+  // UI state
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [statesLoading, setStatesLoading] = useState(false);
+  const [citiesLoading, setCitiesLoading] = useState(false);
 
-    // -----------------------------
-    // Load States
-    // -----------------------------
+  // -----------------------------
+  // Load States
+  // -----------------------------
 
-    useEffect(() => {
-        const loadStates = async () => {
-            try {
-                setStatesLoading(true);
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        setStatesLoading(true);
 
-                const data = await getStates();
+        const data = await getStates();
 
-                setStates(data);
-            } catch (error) {
-                console.error("Failed to load states:", error);
-
-                setErrors((previous) => ({
-                    ...previous,
-                    stateId: "Unable to load states",
-                }));
-            } finally {
-                setStatesLoading(false);
-            }
-        };
-
-        loadStates();
-    }, []);
-
-    // -----------------------------
-    // Load Cities
-    // -----------------------------
-
-    useEffect(() => {
-        const loadCities = async () => {
-            if (!form.stateId) {
-                setCities([]);
-                return;
-            }
-
-            try {
-                setCitiesLoading(true);
-
-                const data = await getCitiesByState(form.stateId);
-
-                const cityList = Array.isArray(data)
-                    ? data
-                    : data?.cities || [];
-
-                setCities(cityList);
-            } catch (error) {
-                console.error("Failed to load cities:", error);
-
-                setCities([]);
-
-                setErrors((previous) => ({
-                    ...previous,
-                    city: "Unable to load cities",
-                }));
-            } finally {
-                setCitiesLoading(false);
-            }
-        };
-
-        loadCities();
-    }, [form.stateId]);
-
-    // -----------------------------
-    // Persist Form Draft
-    // -----------------------------
-
-    useEffect(() => {
-        setStorageItem(DRAFT_KEY, form);
-    }, [form]);
-
-    // -----------------------------
-    // Generic Input Change
-    // -----------------------------
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-
-        setForm((previous) => ({
-            ...previous,
-            [name]: value,
-        }));
+        setStates(data);
+      } catch (error) {
+        console.error("Failed to load states:", error);
 
         setErrors((previous) => ({
-            ...previous,
-            [name]: "",
-            submit: "",
+          ...previous,
+          stateId: "Unable to load states",
         }));
+      } finally {
+        setStatesLoading(false);
+      }
     };
 
-    // -----------------------------
-    // State Change
-    // -----------------------------
+    loadStates();
+  }, []);
 
-    const handleStateChange = (event) => {
-        const stateId = event.target.value;
+  // -----------------------------
+  // Load Cities
+  // -----------------------------
 
-        setForm((previous) => ({
-            ...previous,
-            stateId,
-            city: "",
-        }));
+  useEffect(() => {
+    const loadCities = async () => {
+      if (!form.stateId) {
+        setCities([]);
+        return;
+      }
+
+      try {
+        setCitiesLoading(true);
+
+        const data = await getCitiesByState(form.stateId);
+
+        const cityList = Array.isArray(data) ? data : data?.cities || [];
+
+        setCities(cityList);
+      } catch (error) {
+        console.error("Failed to load cities:", error);
 
         setCities([]);
 
         setErrors((previous) => ({
-            ...previous,
-            stateId: "",
-            city: "",
-            submit: "",
+          ...previous,
+          city: "Unable to load cities",
         }));
+      } finally {
+        setCitiesLoading(false);
+      }
     };
 
-    // -----------------------------
-    // Hobby Change
-    // -----------------------------
+    loadCities();
+  }, [form.stateId]);
 
-    const handleHobbyChange = (hobby) => {
-        setForm((previous) => {
-            const alreadySelected =
-                previous.hobbies.includes(hobby);
+  // -----------------------------
+  // Persist Form Draft
+  // -----------------------------
 
-            return {
-                ...previous,
+  useEffect(() => {
+    setStorageItem(DRAFT_KEY, form);
+  }, [form]);
 
-                hobbies: alreadySelected
-                    ? previous.hobbies.filter(
-                          (item) => item !== hobby
-                      )
-                    : [...previous.hobbies, hobby],
-            };
-        });
-    };
+  // -----------------------------
+  // Generic Input Change
+  // -----------------------------
 
-    // -----------------------------
-    // Picture Change
-    // -----------------------------
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
-    const handlePictureChange = (event) => {
-        const file = event.target.files?.[0];
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
 
-        if (!file) {
-            setPicture(null);
-            return;
-        }
+    setErrors((previous) => ({
+      ...previous,
+      [name]: "",
+      submit: "",
+    }));
+  };
 
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-        ];
+  // -----------------------------
+  // State Change
+  // -----------------------------
 
-        if (!allowedTypes.includes(file.type)) {
-            setPicture(null);
+  const handleStateChange = (event) => {
+    const stateId = event.target.value;
 
-            setErrors((previous) => ({
-                ...previous,
-                picture:
-                    "Only JPG and PNG images are allowed",
-            }));
+    setForm((previous) => ({
+      ...previous,
+      stateId,
+      city: "",
+    }));
 
-            // Reset browser file input
-            event.target.value = "";
+    setCities([]);
 
-            return;
-        }
+    setErrors((previous) => ({
+      ...previous,
+      stateId: "",
+      city: "",
+      submit: "",
+    }));
+  };
 
-        setPicture(file);
+  // -----------------------------
+  // Hobby Change
+  // -----------------------------
 
-        setErrors((previous) => ({
-            ...previous,
-            picture: "",
-            submit: "",
-        }));
-    };
+  const handleHobbyChange = (hobby) => {
+    setForm((previous) => {
+      const alreadySelected = previous.hobbies.includes(hobby);
 
-    // -----------------------------
-    // Terms Change
-    // -----------------------------
+      return {
+        ...previous,
 
-    const handleTermsChange = (event) => {
-        const checked = event.target.checked;
+        hobbies: alreadySelected
+          ? previous.hobbies.filter((item) => item !== hobby)
+          : [...previous.hobbies, hobby],
+      };
+    });
+  };
 
-        setForm((previous) => ({
-            ...previous,
-            agreeTerms: checked,
-        }));
+  // -----------------------------
+  // Picture Change
+  // -----------------------------
 
-        setErrors((previous) => ({
-            ...previous,
-            agreeTerms: "",
-            submit: "",
-        }));
-    };
+  const handlePictureChange = (event) => {
+    const file = event.target.files?.[0];
 
-    // -----------------------------
-    // Submit
-    // -----------------------------
+    if (!file) {
+      setPicture(null);
+      return;
+    }
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    const allowedTypes = ["image/jpeg", "image/png"];
 
-        // Validate normal fields first
-        const validationErrors =
-            validateRegistration(form);
+    if (!allowedTypes.includes(file.type)) {
+      setPicture(null);
 
-        if (
-            Object.keys(validationErrors).length > 0
-        ) {
-            setErrors(validationErrors);
-            return;
-        }
+      setErrors((previous) => ({
+        ...previous,
+        picture: "Only JPG and PNG images are allowed",
+      }));
 
-        // Assignment requirement:
-        // Terms validation should only happen
-        // after other fields are valid.
-        if (!form.agreeTerms) {
-            setErrors({
-                agreeTerms:
-                    "Please agree to the Terms and Conditions",
-            });
+      // Reset browser file input
+      event.target.value = "";
 
-            return;
-        }
+      return;
+    }
 
-        try {
-            setLoading(true);
-            setErrors({});
+    setPicture(file);
 
-            const formData = new FormData();
+    setErrors((previous) => ({
+      ...previous,
+      picture: "",
+      submit: "",
+    }));
+  };
 
-            formData.append(
-                "name",
-                form.name.trim()
-            );
+  // -----------------------------
+  // Terms Change
+  // -----------------------------
 
-            formData.append(
-                "gender",
-                form.gender
-            );
+  const handleTermsChange = (event) => {
+    const checked = event.target.checked;
 
-            formData.append(
-                "dateOfBirth",
-                form.dateOfBirth.trim()
-            );
+    setForm((previous) => ({
+      ...previous,
+      agreeTerms: checked,
+    }));
 
-            formData.append(
-                "email",
-                form.email.trim()
-            );
+    setErrors((previous) => ({
+      ...previous,
+      agreeTerms: "",
+      submit: "",
+    }));
+  };
 
-            formData.append(
-                "mobile",
-                form.mobile.trim()
-            );
+  // -----------------------------
+  // Submit
+  // -----------------------------
 
-            formData.append(
-                "phone",
-                form.phone.trim()
-            );
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-            formData.append(
-                "stateId",
-                form.stateId
-            );
+    // Validate normal fields first
+    const validationErrors = validateRegistration(form);
 
-            formData.append(
-                "city",
-                form.city
-            );
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-            // Append hobbies using the same key
-            // so backend receives an array.
-            form.hobbies.forEach((hobby) => {
-                formData.append(
-                    "hobbies",
-                    hobby
-                );
-            });
+    // Assignment requirement:
+    // Terms validation should only happen
+    // after other fields are valid.
+    if (!form.agreeTerms) {
+      setErrors({
+        agreeTerms: "Please agree to the Terms and Conditions",
+      });
 
-            // Picture is optional
-            if (picture) {
-                formData.append(
-                    "picture",
-                    picture
-                );
-            }
+      return;
+    }
 
-            await registerUser(formData);
+    try {
+      setLoading(true);
+      setErrors({});
 
-            // Registration successful:
-            // remove unfinished draft.
-            removeStorageItem(DRAFT_KEY);
+      const formData = new FormData();
 
-            navigate("/users");
-        } catch (error) {
-            console.error(
-                "Registration failed:",
-                error
-            );
+      formData.append("name", form.name.trim());
+      formData.append("gender", form.gender);
+      formData.append("dateOfBirth", form.dateOfBirth.trim());
+      formData.append("email", form.email.trim());
+      formData.append("password", form.password);
+      formData.append("mobile", form.mobile.trim());
+      formData.append("phone", form.phone.trim());
+      formData.append("stateId", form.stateId);
+      formData.append("city", form.city);
 
-            setErrors({
-                submit:
-                    error.response?.data?.message ||
-                    "Registration failed. Please try again.",
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+      // Append hobbies using the same key
+      // so backend receives an array.
+      form.hobbies.forEach((hobby) => {
+        formData.append("hobbies", hobby);
+      });
 
-    return (
-        <RegistrationForm
-            form={form}
-            states={states}
-            cities={cities}
-            picture={picture}
-            errors={errors}
-            loading={loading}
-            statesLoading={statesLoading}
-            citiesLoading={citiesLoading}
-            onChange={handleChange}
-            onStateChange={handleStateChange}
-            onHobbyChange={handleHobbyChange}
-            onPictureChange={handlePictureChange}
-            onTermsChange={handleTermsChange}
-            onSubmit={handleSubmit}
-        />
-    );
+      // Picture is optional
+      if (picture) {
+        formData.append("picture", picture);
+      }
+
+      await registerUser(formData);
+
+      removeStorageItem(DRAFT_KEY);
+
+      toast.success("Registration successful! Please login.");
+
+      navigate("/login");
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration failed:", error);
+
+      const message =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      setErrors({
+        submit: message,
+      });
+
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <RegistrationForm
+      form={form}
+      states={states}
+      cities={cities}
+      picture={picture}
+      errors={errors}
+      loading={loading}
+      statesLoading={statesLoading}
+      citiesLoading={citiesLoading}
+      onChange={handleChange}
+      onStateChange={handleStateChange}
+      onHobbyChange={handleHobbyChange}
+      onPictureChange={handlePictureChange}
+      onTermsChange={handleTermsChange}
+      onSubmit={handleSubmit}
+    />
+  );
 };
 
 export default Register;
