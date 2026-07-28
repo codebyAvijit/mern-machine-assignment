@@ -25,8 +25,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       default: null,
-      unique: true,
-      sparse: true,
     },
 
     password: {
@@ -77,7 +75,15 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-userSchema.index({ email: 1 });
+// Indexes
+userSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    sparse: true,
+  },
+);
+
 userSchema.index({ stateId: 1 });
 
 const User = mongoose.model("User", userSchema);

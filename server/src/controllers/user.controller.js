@@ -1,39 +1,40 @@
 const userService = require("../services/user.service");
+const ApiResponse = require("../utils/response/ApiResponse");
+const userResponse = require("../utils/response/userResponse");
 
 const handleCreateUser = async (req, res, next) => {
-    try {
-        const userData = {
-            ...req.body,
-            picture: req.file ? req.file.filename : null,
-        };
+  try {
+    const userData = {
+      ...req.body,
+      picture: req.file ? req.file.filename : null,
+    };
 
-        const user = await userService.createUser(userData);
+    const user = await userService.createUser(userData);
 
-        res.status(201).json({
-            success: true,
-            message: "User registered successfully",
-            data: user,
-        });
-    } catch (error) {
-        next(error);
-    }
+    return ApiResponse.created(
+      res,
+      "User registered successfully",
+      userResponse(user),
+    );
+  } catch (error) {
+    next(error);
+  }
 };
 
 const handleGetUsers = async (req, res, next) => {
-    try {
-        const result = await userService.getUsers(req.query);
+  try {
+    const result = await userService.getUsers(req.query);
 
-        res.status(200).json({
-            success: true,
-            data: result.users,
-            pagination: result.pagination,
-        });
-    } catch (error) {
-        next(error);
-    }
+    return ApiResponse.success(res, "Users fetched successfully", {
+      users: result.users.map(userResponse),
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
-    handleCreateUser,
-    handleGetUsers
+  handleCreateUser,
+  handleGetUsers,
 };
