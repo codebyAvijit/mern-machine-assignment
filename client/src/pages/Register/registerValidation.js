@@ -1,109 +1,111 @@
 export const validateRegistration = (form) => {
-    const errors = {};
+  const errors = {};
 
-    const indianPhoneRegex = /^[6-9]\d{9}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const indianPhoneRegex = /^[6-9]\d{9}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // -------------------------
-    // Name
-    // -------------------------
-    if (!form.name.trim()) {
-        errors.name = "Name is required";
-    } else if (form.name.trim().length > 25) {
-        errors.name = "Name cannot exceed 25 characters";
-    }
+  // -------------------------
+  // Name
+  // -------------------------
+  if (!form.name.trim()) {
+    errors.name = "Name is required";
+  } else if (form.name.trim().length > 25) {
+    errors.name = "Name cannot exceed 25 characters";
+  }
 
-    // -------------------------
-    // Gender
-    // -------------------------
-    if (!form.gender) {
-        errors.gender = "Gender is required";
-    }
+  // -------------------------
+  // Gender
+  // -------------------------
+  if (!form.gender) {
+    errors.gender = "Gender is required";
+  }
 
-    // -------------------------
-    // Date of Birth
-    // Internal format: YYYY-MM-DD
-    // UI displays: DD/MM/YYYY
-    // -------------------------
-    if (!form.dateOfBirth) {
-        errors.dateOfBirth = "Date of birth is required";
+  // -------------------------
+  // Date of Birth
+  // Internal format: YYYY-MM-DD
+  // UI displays: DD/MM/YYYY
+  // -------------------------
+  if (!form.dateOfBirth) {
+    errors.dateOfBirth = "Date of birth is required";
+  } else {
+    const date = new Date(`${form.dateOfBirth}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+      errors.dateOfBirth = "Enter a valid date";
     } else {
-        const date = new Date(
-            `${form.dateOfBirth}T00:00:00`
-        );
+      const today = new Date();
 
-        if (Number.isNaN(date.getTime())) {
-            errors.dateOfBirth = "Enter a valid date";
-        } else {
-            const today = new Date();
+      today.setHours(23, 59, 59, 999);
 
-            today.setHours(23, 59, 59, 999);
-
-            if (date > today) {
-                errors.dateOfBirth =
-                    "Date of birth cannot be in the future";
-            }
-        }
+      if (date > today) {
+        errors.dateOfBirth = "Date of birth cannot be in the future";
+      }
     }
+  }
 
-    // -------------------------
-    // Email - optional
-    // -------------------------
-    if (form.email.trim()) {
-        if (form.email.trim().length > 25) {
-            errors.email =
-                "Email cannot exceed 25 characters";
-        } else if (
-            !emailRegex.test(form.email.trim())
-        ) {
-            errors.email =
-                "Enter a valid email address";
-        }
+  // -------------------------
+  // Email - optional
+  // -------------------------
+  if (form.email.trim()) {
+    if (form.email.trim().length > 25) {
+      errors.email = "Email cannot exceed 25 characters";
+    } else if (!emailRegex.test(form.email.trim())) {
+      errors.email = "Enter a valid email address";
     }
+  }
 
-    // -------------------------
-    // Mobile / Phone
-    // At least one is required
-    // -------------------------
-    const mobile = form.mobile.trim();
-    const phone = form.phone.trim();
+  // -------------------------
+  // Password
+  // -------------------------
+  if (!form.password) {
+    errors.password = "Password is required";
+  } else if (form.password.length < 8) {
+    errors.password = "Password must be at least 8 characters";
+  }
 
-    if (!mobile && !phone) {
-        errors.mobile =
-            "Mobile or phone is required";
-    }
+  // -------------------------
+  // Confirm Password
+  // -------------------------
+  if (!form.confirmPassword) {
+    errors.confirmPassword = "Confirm password is required";
+  } else if (form.password !== form.confirmPassword) {
+    errors.confirmPassword = "Passwords do not match";
+  }
 
-    // Validate mobile only if entered
-    if (
-        mobile &&
-        !indianPhoneRegex.test(mobile)
-    ) {
-        errors.mobile =
-            "Enter a valid 10-digit Indian mobile number";
-    }
+  // -------------------------
+  // Mobile / Phone
+  // At least one is required
+  // -------------------------
+  const mobile = form.mobile.trim();
+  const phone = form.phone.trim();
 
-    // Validate phone only if entered
-    if (
-        phone &&
-        !indianPhoneRegex.test(phone)
-    ) {
-        errors.phone =
-            "Enter a valid 10-digit Indian phone number";
-    }
+  if (!mobile && !phone) {
+    errors.mobile = "Mobile or phone is required";
+  }
 
-    // -------------------------
-    // State
-    // -------------------------
-    if (!form.stateId) {
-        errors.stateId = "State is required";
-    }
+  // Validate mobile only if entered
+  if (mobile && !indianPhoneRegex.test(mobile)) {
+    errors.mobile = "Enter a valid 10-digit Indian mobile number";
+  }
 
-    // -------------------------
-    // City
-    // -------------------------
-    if (!form.city) {
-        errors.city = "City is required";
-    }
+  // Validate phone only if entered
+  if (phone && !indianPhoneRegex.test(phone)) {
+    errors.phone = "Enter a valid 10-digit Indian phone number";
+  }
 
-    return errors;
+  // -------------------------
+  // State
+  // -------------------------
+  if (!form.stateId) {
+    errors.stateId = "State is required";
+  }
+
+  // -------------------------
+  // City
+  // -------------------------
+  if (!form.city) {
+    errors.city = "City is required";
+  }
+
+  return errors;
 };

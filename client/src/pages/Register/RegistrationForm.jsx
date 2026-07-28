@@ -160,6 +160,44 @@ const RegistrationForm = ({
                 {errors.email && <p className={errorClass}>{errors.email}</p>}
               </div>
 
+              {/* Password */}
+              <div>
+                <label className={labelClass}>
+                  Password <span className="text-red-500">*</span>
+                </label>
+
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={onChange}
+                  className={inputClass}
+                />
+
+                {errors.password && (
+                  <p className={errorClass}>{errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className={labelClass}>
+                  Confirm Password <span className="text-red-500">*</span>
+                </label>
+
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={onChange}
+                  className={inputClass}
+                />
+
+                {errors.confirmPassword && (
+                  <p className={errorClass}>{errors.confirmPassword}</p>
+                )}
+              </div>
+
               {/* Mobile */}
               <div>
                 <label className={labelClass}>Mobile</label>
