@@ -4,6 +4,7 @@ const helmet = require("helmet");
 
 const stateRoutes = require("./routes/state.routes");
 const userRoutes = require("./routes/user.routes");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/states", stateRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 const {
   notFoundHandler,
